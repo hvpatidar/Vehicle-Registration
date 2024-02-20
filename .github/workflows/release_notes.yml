@@ -2,7 +2,7 @@ name: Generate Release Notes
 on:
   push:
     branches:
-      - master  # Specify the branch name here
+      - master
 
 jobs:
   generate-release-notes:
@@ -10,14 +10,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Generate release tag
-        id: generate_release_tag
-        uses: alexvingg/next-release-tag@v1.0.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_prefix: ''
+        
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0)
+          echo "::set-output name=tag::$latest_tag"
+
+      - name: Increment tag version
+        id: increment_tag
+        run: |
+          version=${{ steps.get_latest_tag.outputs.tag }}
+          IFS='.' read -r -a parts <<< "$version"
+          major="${parts[0]}"
+          minor="${parts[1]}"
+          patch=$((parts[2]+1))
+          new_tag="v$major.$minor.$patch"
+          echo "::set-output name=new_tag::$new_tag"
 
       - name: Generate Release Notes
         id: release_notes
@@ -26,13 +35,10 @@ jobs:
           # For example, you can use Git commands or scripts to extract commit messages since the last release
           echo "## Release Notes" > release_notes.md
           git log --format="- %s" origin/master...HEAD >> release_notes.md
-      
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.increment_tag.outputs.new_tag }}  # Use the incremented tag version
           release_name: Release ${{ steps.increment_tag.outputs.new_tag }}  # Use the incremented tag version
