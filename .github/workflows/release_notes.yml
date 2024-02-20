@@ -14,17 +14,11 @@ jobs:
       - name: Fetch latest changes
         run: git fetch --depth=1 origin master
 
-      - name: Get latest tag
-        id: get_latest_tag
-        run: |
-          latest_tag=$(git describe --tags --abbrev=0)
-          echo "::set-output name=tag::$latest_tag"
-
       - name: Increment tag version
         id: increment_tag
         run: |
-          version=${{ steps.get_latest_tag.outputs.tag }}
-          IFS='.' read -r -a parts <<< "$version"
+          latest_tag=$(git describe --tags --abbrev=0)
+          IFS='.' read -r -a parts <<< "$latest_tag"
           major="${parts[0]}"
           minor="${parts[1]}"
           patch=$((parts[2]+1))
