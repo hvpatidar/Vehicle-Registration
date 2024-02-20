@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Fetch latest changes
-        run: git fetch --depth=1 origin main
+        run: git fetch --depth=1 origin master
 
       - name: Generate Release Notes
         id: release_notes
@@ -20,7 +20,7 @@ jobs:
           # Your script or command to generate release notes
           # For example, you can use Git commands or scripts to extract commit messages since the last release
           echo "## Release Notes" > release_notes.md
-          git log --format="- %s" origin/main...HEAD >> release_notes.md
+          git log --format="- %s" origin/master...HEAD >> release_notes.md
 
       - name: Create Release
         id: create_release
