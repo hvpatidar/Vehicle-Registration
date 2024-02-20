@@ -1,0 +1,33 @@
+name: Generate Release Notes
+on:
+  push:
+    branches:
+      - master  # Specify the branch name here
+
+jobs:
+  generate-release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          # Your script or command to generate release notes
+          # For example, you can use Git commands or scripts to extract commit messages since the last release
+          echo "## Release Notes" > release_notes.md
+          git log --format="- %s" origin/main...HEAD >> release_notes.md
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v1.0.0  # Specify the tag name for the release
+          release_name: Release v1.0.0
+          body: |
+            ${{ steps.release_notes.outputs.release_notes }}  # Include generated release notes
+          draft: false
+          prerelease: false
