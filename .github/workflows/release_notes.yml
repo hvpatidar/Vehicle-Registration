@@ -10,6 +10,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        
+      - name: Fetch latest changes
+        run: git fetch --depth=1 origin main
 
       - name: Generate Release Notes
         id: release_notes
